@@ -1,12 +1,17 @@
-import { Button } from "@/components/ui/button";
+import Client from "@/components/client";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
 
 export default function Home() {
+  const queryClient = getQueryClient();
+  void queryClient.prefetchQuery(trpc.hello.queryOptions({ text: 'client' }));
+
   return (
-    <div className="w-full h-screen flex items-center justify-center flex-col">
-      Get Started by editing <code className="ml-2 bg-gray-100 rounded-sm p-1">src/app/page.tsx</code>
-      <a href="http://nextjs.org" target="_blank" rel="noopener noreferrer">
-        <Button className="mt-4 cursor-pointer">Learn More about Next.js 15</Button>
-      </a>
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Client />
+      </Suspense>
+    </HydrationBoundary>
   );
 }
